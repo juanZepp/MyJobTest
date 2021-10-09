@@ -16,7 +16,7 @@
             $urlArray = array_filter($urlArray);
 
             if(empty($urlArray))
-                $this->controller = "StatusController";            
+                $this->controller = "statusController";            
             else
                 $this->controller = ucwords(array_shift($urlArray));
 
