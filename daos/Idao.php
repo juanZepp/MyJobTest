@@ -1,11 +1,10 @@
-<?php namespace daos;
+<?php 
 
-    interface Idao {
-       
-        public function getAll();
-        public function add($object);
+namespace daos;
 
-
-    }
+interface Idao {     
+    public function getAll();
+    public function add($object);
+}
 
 ?>
