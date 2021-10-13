@@ -2,9 +2,9 @@
 namespace controllers;
 
 use daos\DaoCuentas as daoCuentas;
-use daos\DaoPerfiles;
+use daos\DaoStudents;
 use models\Cuenta as cuenta;
-use models\Perfil as perfil;
+use models\Studens as student;
 use PDOException;
 
 class cuentasControllers{
@@ -44,11 +44,11 @@ class cuentasControllers{
 
     //studentId, careerId, active ?????
     public function create($firstName, $lastName, $dni, $fileNumber, $gender, $birthday, $email, $phoneNumber, $password, $rPassword){
-        $daoPerfil = $daoPerfiles::getInstance();
+        $daoStudent = $daoStudents::getInstance();
 
         $_SESSION['registerValidator']['email'] = ($this->daoCuenta->exist($email)) ? 'is-invalid' : 'is-valid';
         
-        $_SESSION['registerValidator']['dni'] = ($daoPerfil->exist($email)) ? 'is-invalid' : 'is-valid';
+        $_SESSION['registerValidator']['dni'] = ($daoStudent->exist($email)) ? 'is-invalid' : 'is-valid';
         
         $_SESSION['registerValidator']['password'] = ($password != $rPassword) ? 'is-invalid' : 'is-valid';
 
@@ -60,7 +60,7 @@ class cuentasControllers{
 
             $cuenta = new Cuenta(0, $email, $password, 1);
 
-            $cuenta->setPerfil(new Perfil($firstName, $lastName, $dni, $fileNumber, $gender, $birthday, $email, $phoneNumber));
+            $cuenta->setStudent(new Student($firstName, $lastName, $dni, $fileNumber, $gender, $birthday, $email, $phoneNumber));
 
             try{
                 $this->daoCuenta->add($cuenta);
@@ -90,7 +90,7 @@ class cuentasControllers{
         $loginController->init();
     }
 
-    public function viewPerfil(){
+    public function viewStudent(){
         if(isset($_SESSION['cuenta'])){
             include ROOT . VIEWS_PATH . "nav-bar.php";
             include ROOT . VIEWS_PATH . "view-cuenta.php";
@@ -101,7 +101,7 @@ class cuentasControllers{
 
     public function update($firstName, $lastName, $fileNumber, $gender, $birthday, $phoneNumber, $password, $rPassword){
 
-        $daoPerfil = $daoPerfiles::getInstance();
+        $daoStudent = $daoStudents::getInstance();
 
         $cuentaOriginal = $_SESSION['cuenta'];
 
@@ -115,19 +115,19 @@ class cuentasControllers{
             unset($_SESSION['updateValidator']);
 
             $cuentaOriginal->setPassword($password);
-            $cuentaOriginal->getPerfil()->setFirstName($firstName);
-            $cuentaOriginal->getPerfil()->setLasttName($lastName);
-            $cuentaOriginal->getPerfil()->setFileNumber($fileNumber);
-            $cuentaOriginal->getPerfil()->setGender($gender);
-            $cuentaOriginal->getPerfil()->setBirthday($birthday);
-            $cuentaOriginal->getPerfil()->setPhoneNumber($phoneNumber);
+            $cuentaOriginal->getStudent()->setFirstName($firstName);
+            $cuentaOriginal->getStudent()->setLasttName($lastName);
+            $cuentaOriginal->getStudent()->setFileNumber($fileNumber);
+            $cuentaOriginal->getStudent()->setGender($gender);
+            $cuentaOriginal->getStudent()->setBirthday($birthday);
+            $cuentaOriginal->getStudent()->setPhoneNumber($phoneNumber);
 
             try{
                 $this->daoCuenta->update($cuenta);
 
                 $_SESSION['cuenta'] = $cuentaOriginal;
 
-                $this->viewPerfil();
+                $this->viewStudent();
 
             }
             catch(PDOException $p){
@@ -135,5 +135,5 @@ class cuentasControllers{
             }
         }
     }
-    
 }
+?>

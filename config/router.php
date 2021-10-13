@@ -4,10 +4,8 @@ namespace config;
 
 use config\request as Request;
 
-class router
-{
-    public static function Route(Request $request)
-    {
+class router{
+    public static function Route(Request $request){
         $controllerName = $request->getcontroller();
         $methodName = $request->getmethod();
         $methodParameters = $request->getparameters();

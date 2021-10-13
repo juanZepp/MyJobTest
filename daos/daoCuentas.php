@@ -1,10 +1,12 @@
 <?php
+
 namespace daos;
 
 require_once("config.autoload.php");
 
 use daos\Connection as connection;
 use models\Cuenta as cuenta;
+use daos\DaoStudents as daoStudents;
 use PDOException;
 
 class daoCuentas implements Idao{
@@ -16,17 +18,73 @@ class daoCuentas implements Idao{
 
     }
 
-    public function Add($cuenta){
-        // llenar con los atributos que tenga cuenta
-        $sql = "INSERT into cuentas (enabled) values (:enabled);";
-        $parameters['enabled']=1;
+    public function add($cuenta){
+        if($cuenta instanceof Cuenta){
+            try{
+                $sql = "INSERT into cuentas (email, password, privilegios, enabled) values (:email, :password, :privilegios,:enabled);";
+                $parameters['email'] =  $cuenta->getEmail();
+                $parameters['password'] =  $cuenta->getPassword();
+                $parameters['privilegios'] =  $cuenta->getPrivilegios();
+                $parameters['enabled']=1;
+
+                $this->connection = connection::GetInstance();
+
+                $this->connection->ExecuteNonQuery($sql,$parameters);
+
+                //el id se genera en la base de datos, por eso tengo que pedir nuevamente el objeto.
+                $object = $this->getByEmail($cuenta->getEmail());
+
+                $cuenta->setId($object->getId());
+            
+                $daoStudent = daoStudents::GetInstance();
+
+                $daoStudent->add($cuenta);
+
+            }
+            catch(PDOException $ex){
+                throw $ex;
+            }
+        }
+    }
+
+    
+    public function getByEmail($email){
         try{
-            $this->connection = connection::GetInstance();
-            return $this->connection->ExecuteNonQuery($sql,$parameters);
-        }catch(PDOException $ex){
+            // :email o $email?
+            $sql = " SELECT * from cuentas where email = :email";
+
+            $this->connection = Connection::GetInstance();
+
+            $resultSet = $this->connection->Execute($sql);
+
+            $array = $this->mapeo($resultSet);
+
+            $object = !empty($array) ? $array[0] : [];
+
+            /* $daoStudent = daoStudents::GetInstance();
+            $object->setStudent($daoStudent->getByIdCuenta($object->getId())); */
+
+            return $object;
+        }
+        catch (Exception $ex){
             throw $ex;
         }
     }
 
+    public function mapeo($value){
+
+        $daoStudent = daoStudents::getInstance();
+   
+        $cuenta = new Cuenta();
+        $cuenta->setId($value["id"]);
+        $cuenta->setEmail($value["email"]);
+        $cuenta->setPassword($value["password"]);
+        $cuenta->setPrivilegios($value["privilegios"]);
+        $cuenta->setStudent($daoStudent->getByIdCuenta($cuenta->getId()));
+
+        return $cuenta;
+    }
+
+    
 }
 ?>
