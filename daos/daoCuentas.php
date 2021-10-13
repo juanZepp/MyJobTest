@@ -12,7 +12,7 @@ use PDOException;
 class daoCuentas implements Idao{
     private $connection;
     private static $instance = null;
-    const COLUMN_ENABLED = "enabled";
+    //funciona el enabled? si no funciona => const COLUMN_ENABLED = "enabled";
 
     public function __construct(){
 
@@ -47,6 +47,28 @@ class daoCuentas implements Idao{
         }
     }
 
+    public function getById($id){
+        try{
+            // :id o $id?
+            $sql = " SELECT * from cuentas where id = :id";
+
+            $this->connection = Connection::GetInstance();
+
+            $resultSet = $this->connection->Execute($sql);
+
+            $array = $this->mapeo($resultSet);
+
+            $object = !empty($array) ? $array[0] : [];
+
+            /* $daoStudent = daoStudents::GetInstance();
+            $object->setStudent($daoStudent->getByIdCuenta($object->getId())); */
+
+            return $object;
+        }
+        catch (Exception $ex){
+            throw $ex;
+        }
+    }
     
     public function getByEmail($email){
         try{
@@ -84,6 +106,24 @@ class daoCuentas implements Idao{
 
         return $cuenta;
     }
+
+    public function exist($email){
+        try{
+            $sql = "SELECT exists ( SELECT * from cuentas where email = :email);";
+
+            $this->connection = connection::GetInstance();
+
+            $result = $this->Execute($sql);
+
+            $rta = ($result[0][0] != 1)? false : true;
+
+            return $rta;
+        }
+        catch(Exception $ex){
+            throw $ex;
+        }
+    }
+
 
     
 }
