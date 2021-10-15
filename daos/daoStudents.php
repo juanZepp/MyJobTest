@@ -61,6 +61,46 @@ class daoStudents implements Idao{
         }
     }
 
+    // Usar DaoStudents como recolector de la API
+    public function updateFromApi(){
+
+        $listStudent = $this->studentsFromApi();
+        foreach($listStudent as $student){
+            if(!($this->exist($student->getDni()))){
+                //envio por parametro cuenta asi que deberia revisarlo, quizas creando un segundo add para student
+                $this->add($student);
+            }
+        }
+
+    }
+    
+    //Devuelve un arreglo de Students que vienen de la API
+    private function studentsFromApi()
+    {
+        $api_url = "" . KEY_TMDB . "&language=en-US";
+        $api_json = file_get_contents($api_url);
+        $api_array = ($api_json) ? json_decode($api_json, true) : array();
+
+        $listStudent = array();
+
+        foreach ($api_array["students"] as $value) {
+            $student = new Student();
+
+            $student->setFirstName($value["firstName"]);
+            $student->setLastName($value["lastName"]);
+            $student->setDni($value["dni"]);
+            $student->setFileNumber($value["fileNumber"]);
+            $student->setGender($value["gender"]);
+            $student->setBirthday($value["birthday"]);
+            $student->setPhoneNumber($value["phoneNumber"]);
+            $student->setActive($value["active"]);
+
+            array_push($listStudent, $student);
+        }
+
+        return $listStudent;
+    }
+
     public function getByIdCuenta($idCuenta){
         try{
             //student no tiene idCuenta, pero se la creo por const arriba. Sirve???
@@ -118,6 +158,7 @@ class daoStudents implements Idao{
     }
 
     public function add($cuenta){
+        //Este if hace especial el add debido que envio por parametro cuenta
         if(($cuenta instanceof Cuenta) && ($cuenta->getStudent() instanceof Student)){
             try{
                 $sql = "INSERT into student (firstName, lastName, dni, fileNumber, gender, birthday, phoneNumber, active) values (:firstName, :lastName, :dni, :fileNumber, :gender, :birthday, :phoneNumber, :active);";
