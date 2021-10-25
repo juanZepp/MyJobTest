@@ -2,15 +2,15 @@
 
 namespace daos;
 
+require_once("config/autoload.php");
+
 use PDOExceptions;
 use models\Student as student;
-use models\cuenta;
 use daos\connection as connection;
 
 class daoStudents implements Idao{
     private $connection;
     private static $instance = null;
-    const idCuenta = "idCuenta";
 
     private function __construct(){
     }
@@ -24,16 +24,9 @@ class daoStudents implements Idao{
 
     public function update($student){
         try{
-            // studentid, careerId?
-            $sql = "UPDATE student set firstName = :firstName, lastName = :lastName, dni = :dni, fileNumber = :fileNumber, gender = :gender, birthday = :birthday, phoneNumber = :phoneNumber, active = :active where studentId = :studentId;";
-            $parameters['firstName'] = $student->getFirstName();
-            $parameters['lastName'] = $student->getLastName();
-            $parameters['dni'] = $student->getDni();
-            $parameters['fileNumber'] = $student->getFileNumber();
-            $parameters['gender'] = $student->getGender();
-            $parameters['birthday'] = $student->getBirthday();
-            $parameters['phoneNumber'] = $student->getPhoneNumber();
-            $parameters['active'] = $student->getActive();
+            $sql = "UPDATE students set email = :email, password = :password where studentId = :studentId;";
+            $parameters['email'] = $student->getEmail();
+            $parameters['password'] = $student->getPassword();
 
             $this->connection = connection::GetInstance();
 
@@ -44,9 +37,9 @@ class daoStudents implements Idao{
         }
     }
 
-    public function exist($dni){
+    public function exist($email){
         try{
-            $sql = "SELECT exists ( SELECT * from cuentas where dni = :dni);";
+            $sql = "SELECT exists ( SELECT * from students where email = :email);";
 
             $this->connection = connection::GetInstance();
 
@@ -63,37 +56,42 @@ class daoStudents implements Idao{
 
     // Usar DaoStudents como recolector de la API
     public function updateFromApi(){
-
         $listStudent = $this->studentsFromApi();
         foreach($listStudent as $student){
             if(!($this->exist($student->getDni()))){
-                //envio por parametro cuenta asi que deberia revisarlo, quizas creando un segundo add para student
                 $this->add($student);
             }
         }
-
     }
     
     //Devuelve un arreglo de Students que vienen de la API
-    private function studentsFromApi()
-    {
-        $api_url = "" . KEY_TMDB . "&language=en-US";
-        $api_json = file_get_contents($api_url);
+    private function studentsFromApi(){
+        // averiguar que hago con los atributos password y privilegios
+        $opciones = array(
+            'http'=>array(
+                'method'=>"GET",
+                'header'=>"x-api-key: 4f3bceed-50ba-4461-a910-518598664c08\r\n"));
+        $contexto = stream_context_create($opciones);
+        $api_url = "https://utn-students-api.herokuapp.com/api/Student";
+        $api_json = file_get_contents($api_url, false, $contexto);
         $api_array = ($api_json) ? json_decode($api_json, true) : array();
 
         $listStudent = array();
 
-        foreach ($api_array["students"] as $value) {
+        foreach ($api_array as $value) {
             $student = new Student();
 
+            $student->setStudentId($value["studentId"]);
+            $student->setCareerId($value["careerId"]);
             $student->setFirstName($value["firstName"]);
             $student->setLastName($value["lastName"]);
             $student->setDni($value["dni"]);
             $student->setFileNumber($value["fileNumber"]);
             $student->setGender($value["gender"]);
             $student->setBirthday($value["birthday"]);
+            $student->setEmail($value["email"]);
             $student->setPhoneNumber($value["phoneNumber"]);
-            $student->setActive($value["active"]);
+            $student->setActive(true);
 
             array_push($listStudent, $student);
         }
@@ -101,10 +99,9 @@ class daoStudents implements Idao{
         return $listStudent;
     }
 
-    public function getByIdCuenta($idCuenta){
+    public function getById($studentId){
         try{
-            //student no tiene idCuenta, pero se la creo por const arriba. Sirve???
-            $sql = "SELECT * from student where idCuenta = :idCuenta;";
+            $sql = "SELECT * from students where studentId = :studentId;";
 
             $this->connection = connection::GetInstance();
 
@@ -123,7 +120,26 @@ class daoStudents implements Idao{
 
     public function getByDni($dni){
         try{
-            $sql = "SELECT * from student where dni = :dni;";
+            $sql = "SELECT * from students where dni = :dni;";
+
+            $this->connection = connection::GetInstance();
+
+            $result = $this->connection->Execute($sql);
+
+            $array = $this->mapeo($result);
+
+            $object = !empty($array) ? $array[0] : [];
+
+            return $object;
+        }
+        catch(Exception $ex){
+            throw $ex;
+        }
+    }
+    
+    public function getByEmail($email){
+        try{
+            $sql = "SELECT * from students where email = :email;";
 
             $this->connection = connection::GetInstance();
 
@@ -142,7 +158,7 @@ class daoStudents implements Idao{
 
     public function getAll(){
         try{
-            $sql = "SELECT * from student;";
+            $sql = "SELECT * from students;";
 
             $this->connection = connection::GetInstance();
 
@@ -157,49 +173,58 @@ class daoStudents implements Idao{
         }
     }
 
-    public function add($cuenta){
-        //Este if hace especial el add debido que envio por parametro cuenta
-        if(($cuenta instanceof Cuenta) && ($cuenta->getStudent() instanceof Student)){
+    public function add($student){
+
+        if($student instanceof Student){
             try{
-                $sql = "INSERT into student (firstName, lastName, dni, fileNumber, gender, birthday, phoneNumber, active) values (:firstName, :lastName, :dni, :fileNumber, :gender, :birthday, :phoneNumber, :active);";
-                $parameters = $this->toArray($cuenta->getStudent());
-                /* sino probar con:
+                // password y privilegios?
+                $sql = "INSERT into students (firstName, lastName, dni, fileNumber, gender, birthday, email, password, phoneNumber, active, privilegios) 
+                values (:firstName, :lastName, :dni, :fileNumber, :gender, :birthday, :email, :password, :phoneNumber, :active, :privilegios);";
+
+                $parameters['studentId'] = $student->getStudentId();
+                $parameters['careerId'] = $student->getCareerId();
                 $parameters['firstName'] = $student->getFirstName();
                 $parameters['lastName'] = $student->getLastName();
                 $parameters['dni'] = $student->getDni();
                 $parameters['fileNumber'] = $student->getFileNumber();
                 $parameters['gender'] = $student->getGender();
                 $parameters['birthday'] = $student->getBirthday();
+                $parameters['email'] = $student->getEmail();
+                $parameters['password'] = $student->getPassword();
                 $parameters['phoneNumber'] = $student->getPhoneNumber();
-                $parameters['active'] = $student->getActive();*/
+                $parameters['active'] = $student->getActive();
+                $parameters['privilegios'] = $student->getPrivilegios();
 
-                $parameters['idCuenta'] = $cuenta->getId();
-                //sino probar con: $parameters[DaoStudents::COLUMN_IDCUENTA] = $cuenta->getId();
-            
                 $this->connection = Connection::GetInstance();
 
-                $this->connection->ExecuteNonQuery($query, $parameters);
+                $this->connection->ExecuteNonQuery($sql, $parameters);
             }catch (Exception $ex){
                 throw $ex;
             }
         }
     }
 
-    public function toArray($object, $type = 0){
+    //posiblemente no ande
+    public function toArray($student, $type = 0){
         $parameters = array();
 
-        if($object instanceof Student){
+        if($student instanceof Student){
             if($type == 0){
-                $parameters['dni'] = $object->getDni();
+                $parameters['dni'] = $student->getDni();
             }
 
-            $parameters['firstName'] = $object->getFirstName();
-            $parameters['lastName'] = $object->getLastName();
-            $parameters['fileNumber'] = $object->getFileNumber();
-            $parameters['gender'] = $object->getGender();
-            $parameters['birthday'] = $object->getBirthday();
-            $parameters['phoneNumber'] = $object->getPhoneNumber();
-            $parameters['active'] = $object->getActive();
+            $parameters['studentId'] = $student->getStudentId();
+            $parameters['careerId'] = $student->getCareerId();
+            $parameters['firstName'] = $student->getFirstName();
+            $parameters['lastName'] = $student->getLastName();
+            $parameters['fileNumber'] = $student->getFileNumber();
+            $parameters['gender'] = $student->getGender();
+            $parameters['birthday'] = $student->getBirthday();
+            $parameters['email'] = $student->getEmail();
+            $parameters['password'] = $student->getPassword();
+            $parameters['phoneNumber'] = $student->getPhoneNumber();
+            $parameters['active'] = $student->getActive();
+            $parameters['privilegios'] = $student->getPrivilegios();
             
         }
         return $parameters;
@@ -214,8 +239,11 @@ class daoStudents implements Idao{
         $student->setFileNumber($value["fileNumber"]);
         $student->setGender($value["gender"]);
         $student->setBirthday($value["birthday"]);
+        $student->setEmail($value["email"]);
+        $student->setPassword($value["password"]);
         $student->setPhoneNumber($value["phoneNumber"]);
         $student->setActive($value["active"]);
+        $student->setPrivilegios($value["privilegios"]);
 
         return $student;
     }

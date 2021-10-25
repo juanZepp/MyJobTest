@@ -2,7 +2,7 @@
 
 namespace models;
 
-class Offer{
+class jobPosition{
     
 }
 

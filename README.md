@@ -1,1 +1,1 @@
-Proyecto MyJob por Federico y Juan Cruz
+Proyecto MyJob por Federico San Pedro y Juan Cruz Aldaya

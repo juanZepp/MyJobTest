@@ -11,11 +11,13 @@ class Student{
     private $fileNumber;
     private $gender;
     private $birthday;
+    private $email;
+    private $password;
     private $phoneNumber;
     private $active;
+    private $privilegios;
 
-    //email esta dentro de cuenta. studentid importa crear otro aparte del de cuenta? careerid?active?
-    function __construct($studentId = 0,$careerId = 0,$firstName = "",$lastName = "",$dni = "",$fileNumber = "",$gender = "",$birthday = "",$phoneNumber = "",$active = true){
+    function __construct($studentId = 0, $careerId = 0,  $firstName = "", $lastName = "", $dni = "", $fileNumber = "", $gender = "", $birthday = "", $email = "", $password = "", $phoneNumber = "", $active = true, $privilegios = ""){
         $this->studentId=$studentId;
         $this->careerId=$careerId;
         $this->firstName=$firstName;
@@ -24,8 +26,11 @@ class Student{
         $this->fileNumber=$fileNumber;
         $this->gender=$gender;
         $this->birthday=$birthday;
+        $this->email=$email;
+        $this->password=$password;
         $this->phoneNumber=$phoneNumber;
         $this->active=$active;
+        $this->privilegios=$privilegios;
     }
  
     public function getStudentId(){
@@ -100,6 +105,24 @@ class Student{
         return $this;
     }
 
+    public function getEmail(){
+        return $this->email;
+    }
+
+    public function setEmail($email){
+        $this->email = $email;
+        return $this;
+    }
+
+    public function getPassword(){
+        return $this->password;
+    }
+
+    public function setPassword($password){
+        $this->password = $password;
+        return $this;
+    }
+
     public function getPhoneNumber(){
         return $this->phoneNumber;
     }
@@ -115,6 +138,15 @@ class Student{
 
     public function setActive($active){
         $this->active = $active;
+        return $this;
+    }
+    
+    public function getPrivilegios(){
+        return $this->privilegios;
+    }
+
+    public function setPrivilegios($privilegios){
+        $this->privilegios = $privilegios;
         return $this;
     }
 }

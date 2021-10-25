@@ -2,7 +2,7 @@
 
 namespace controllers;
 
-// usar daoStudent????
+// usar daoStudent o daoJobOffer????
 use daos\DaoStudents;
 
 class HomeController {

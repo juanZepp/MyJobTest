@@ -2,9 +2,10 @@
 
 namespace controllers;
 
-use daos\DaoCuentas;
-use models\Cuenta;
+use daos\DaoStudents;
+use models\Student;
 use controllers\StudentController as studentController;
+use daos\DaoJobOffers as daoJobOffer;
 
 
 class statusController{
@@ -12,16 +13,16 @@ class statusController{
         $homeController = new HomeController();
         $homeController->navBar();
 
-        if(isset($_SESSION['cuenta'])){
-            if($_SESSION['cuenta']->getPrivilegios()==0){
+        if(isset($_SESSION['student'])){
+            if($_SESSION['student']->getPrivilegios()=="admin"){
             // logeado como admin
                 $studentController = new StudentController();
                 $studentController->listStudents();
             }
-            else if($_SESSION['cuenta']->getPrivilegios()==1){
-            // logeado como usuario
-            // $offerDao = new offerController();
-            // $offerDao->listOffers();
+            else if($_SESSION['student']->getPrivilegios()=="student"){
+            // logeado como usuario, lo que va a ver cuando logee
+            // $daoJobOffer = new jobOfferController();
+            // $daoJobOffer->listOffers();
             }
         }
         else{
