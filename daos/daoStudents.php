@@ -88,10 +88,10 @@ class daoStudents implements Idao{
             $student->setDni($value["dni"]);
             $student->setFileNumber($value["fileNumber"]);
             $student->setGender($value["gender"]);
-            $student->setBirthday($value["birthday"]);
+            $student->setBirthDate($value["birthDate"]);
             $student->setEmail($value["email"]);
             $student->setPhoneNumber($value["phoneNumber"]);
-            $student->setActive(true);
+            $student->setActive($value["active"]);
 
             array_push($listStudent, $student);
         }
@@ -178,8 +178,8 @@ class daoStudents implements Idao{
         if($student instanceof Student){
             try{
                 // password y privilegios?
-                $sql = "INSERT into students (firstName, lastName, dni, fileNumber, gender, birthday, email, password, phoneNumber, active, privilegios) 
-                values (:firstName, :lastName, :dni, :fileNumber, :gender, :birthday, :email, :password, :phoneNumber, :active, :privilegios);";
+                $sql = "INSERT into students (studentId, careerId, firstName, lastName, dni, fileNumber, gender, birthDate, email, password, phoneNumber, active, privilegios) 
+                values (:studentId, :careerId, :firstName, :lastName, :dni, :fileNumber, :gender, :birthDate, :email, :password, :phoneNumber, :active, :privilegios);";
 
                 $parameters['studentId'] = $student->getStudentId();
                 $parameters['careerId'] = $student->getCareerId();
@@ -188,7 +188,7 @@ class daoStudents implements Idao{
                 $parameters['dni'] = $student->getDni();
                 $parameters['fileNumber'] = $student->getFileNumber();
                 $parameters['gender'] = $student->getGender();
-                $parameters['birthday'] = $student->getBirthday();
+                $parameters['birthDate'] = $student->getBirthDate();
                 $parameters['email'] = $student->getEmail();
                 $parameters['password'] = $student->getPassword();
                 $parameters['phoneNumber'] = $student->getPhoneNumber();
@@ -219,7 +219,7 @@ class daoStudents implements Idao{
             $parameters['lastName'] = $student->getLastName();
             $parameters['fileNumber'] = $student->getFileNumber();
             $parameters['gender'] = $student->getGender();
-            $parameters['birthday'] = $student->getBirthday();
+            $parameters['birthDate'] = $student->getBirthDate();
             $parameters['email'] = $student->getEmail();
             $parameters['password'] = $student->getPassword();
             $parameters['phoneNumber'] = $student->getPhoneNumber();
@@ -233,12 +233,14 @@ class daoStudents implements Idao{
     public function mapeo($value){
    
         $student = new Student();
+        $student->setStudentId($value["studentId"]);
+        $student->setCareerId($value["careerId"]);
         $student->setFirstName($value["firstName"]);
         $student->setLastName($value["lastName"]);
         $student->setDni($value["dni"]);
         $student->setFileNumber($value["fileNumber"]);
         $student->setGender($value["gender"]);
-        $student->setBirthday($value["birthday"]);
+        $student->setBirthDate($value["birthDate"]);
         $student->setEmail($value["email"]);
         $student->setPassword($value["password"]);
         $student->setPhoneNumber($value["phoneNumber"]);

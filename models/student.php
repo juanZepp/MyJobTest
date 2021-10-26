@@ -10,14 +10,14 @@ class Student{
     private $dni;
     private $fileNumber;
     private $gender;
-    private $birthday;
+    private $birthDate;
     private $email;
     private $password;
     private $phoneNumber;
     private $active;
     private $privilegios;
 
-    function __construct($studentId = 0, $careerId = 0,  $firstName = "", $lastName = "", $dni = "", $fileNumber = "", $gender = "", $birthday = "", $email = "", $password = "", $phoneNumber = "", $active = true, $privilegios = ""){
+    function __construct($studentId = 0, $careerId = 0,  $firstName = "", $lastName = "", $dni = "", $fileNumber = "", $gender = "", $birthDate = "", $email = "", $password = "", $phoneNumber = "", $active = true, $privilegios = ""){
         $this->studentId=$studentId;
         $this->careerId=$careerId;
         $this->firstName=$firstName;
@@ -25,7 +25,7 @@ class Student{
         $this->dni=$dni;
         $this->fileNumber=$fileNumber;
         $this->gender=$gender;
-        $this->birthday=$birthday;
+        $this->birthDate=$birthDate;
         $this->email=$email;
         $this->password=$password;
         $this->phoneNumber=$phoneNumber;
@@ -96,12 +96,12 @@ class Student{
         return $this;
     }
 
-    public function getBirthday(){
-        return $this->birthday;
+    public function getBirthDate(){
+        return $this->birthDate;
     }
 
-    public function setBirthday($birthday){
-        $this->birthday = $birthday;
+    public function setBirthDate($birthDate){
+        $this->birthDate = $birthDate;
         return $this;
     }
 

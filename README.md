@@ -1,1 +1,1 @@
-Proyecto MyJob por Federico San Pedro y Juan Cruz Aldaya
+Proyecto MyJob por Federico San Pedro y Tomas Aguero
